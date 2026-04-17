@@ -49,3 +49,14 @@ def processing_context():
         "job_id": None,
         "job": None,
     }
+
+
+@pytest.fixture()
+def detail_context():
+    """Share detail-route state across BDD steps."""
+
+    return {
+        "job_id": None,
+        "job": None,
+        "response": None,
+    }

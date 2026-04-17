@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Avatar Job {{ job.job_id }}</title>
+  </head>
+  <body>
+    <main>
+      <h1>Avatar Job Detail</h1>
+      <p><strong>Job ID:</strong> {{ job.job_id }}</p>
+      <p><strong>Status:</strong> {{ job.status }}</p>
+      <p><strong>Voice:</strong> {{ job.voice }}</p>
+      <p><strong>Script:</strong> {{ job.script }}</p>
+
+      <section>
+        <h2>Original Portrait</h2>
+        <img src="{{ job.image_path }}" alt="Submitted portrait image" />
+        <p>{{ job.image_path }}</p>
+      </section>
+
+      {% if job.show_generated_video %}
+      <section>
+        <h2>Generated Avatar Video</h2>
+        <video controls src="{{ job.generated_video_path }}"></video>
+        <p>{{ job.generated_video_path }}</p>
+      </section>
+      {% endif %}
+
+      {% if job.provider_error_message %}
+      <section>
+        <h2>Provider Error</h2>
+        <p>{{ job.provider_error_message }}</p>
+      </section>
+      {% endif %}
+    </main>
+  </body>
+</html>

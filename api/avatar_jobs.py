@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile, status
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from api.dependencies import get_avatar_submission_port, get_settings
+from api.dependencies import (
+    get_avatar_job_query_port,
+    get_avatar_submission_port,
+    get_settings,
+)
 from api.models import ApiResponse, AvatarJobResponse, AvatarSubmissionForm
 from common.settings import AppSettings
+from ports.inbound.avatar_job_query import AvatarJobQueryPort
 from ports.inbound.avatar_submission import AvatarSubmissionInput, AvatarSubmissionPort
 
 router = APIRouter(prefix="/v1/avatar-jobs", tags=["avatar-jobs"])
@@ -65,3 +71,30 @@ async def create_avatar_job(
         )
     )
     return ApiResponse(data=AvatarJobResponse.from_domain(job), error=None)
+
+
+@router.get(
+    "/{job_id}",
+    response_class=HTMLResponse,
+    summary="Render the avatar job detail page",
+    description="Returns the HTML detail page for a stored avatar job.",
+    responses={
+        404: {
+            "model": ApiResponse,
+            "description": "Avatar job was not found.",
+        }
+    },
+)
+def get_avatar_job_detail_page(
+    job_id: str,
+    request: Request,
+    query_port: AvatarJobQueryPort = Depends(get_avatar_job_query_port),
+):
+    """Render the status-aware detail page for an avatar job."""
+
+    job = query_port.get_avatar_job_detail(job_id)
+    return templates.TemplateResponse(
+        request=request,
+        name="avatar_job_detail.html",
+        context={"job": job},
+    )
