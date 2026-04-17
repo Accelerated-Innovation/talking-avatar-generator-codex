@@ -2,11 +2,19 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Protocol
 
 from pydantic import BaseModel, Field
 
-from services.avatar_generation.models import AvatarJob
+
+class AvatarJobPayload(Protocol):
+    """Shape required to render an avatar job response payload."""
+
+    job_id: str
+    status: object
+    voice: str
+    script: str
+    image_path: str
 
 
 class ErrorInfo(BaseModel):
@@ -34,10 +42,10 @@ class AvatarJobResponse(BaseModel):
     image_path: str
 
     @classmethod
-    def from_domain(cls, job: AvatarJob) -> "AvatarJobResponse":
+    def from_domain(cls, job: AvatarJobPayload) -> "AvatarJobResponse":
         return cls(
             job_id=job.job_id,
-            status=job.status.value,
+            status=str(getattr(job.status, "value", job.status)),
             voice=job.voice,
             script=job.script,
             image_path=job.image_path,

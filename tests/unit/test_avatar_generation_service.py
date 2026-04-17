@@ -8,12 +8,13 @@ from datetime import UTC, datetime
 import pytest
 
 from common.errors import ValidationError
+from ports.inbound.avatar_submission import AvatarSubmissionInput
 from ports.outbound.clock import Clock
 from ports.outbound.observability import ObservabilityPort
 from services.avatar_generation.models import (
+    AvatarGeneratedVideo,
     AvatarJob,
     AvatarJobStatus,
-    AvatarSubmissionInput,
     AvatarValidationPolicy,
 )
 from services.avatar_generation.service import AvatarGenerationService
@@ -61,6 +62,12 @@ class FakeObservability(ObservabilityPort):
         return None
 
 
+class FakeAvatarProvider:
+    def generate_video(self, job: AvatarJob) -> AvatarGeneratedVideo:
+        del job
+        return AvatarGeneratedVideo(content=b"mock-video", file_extension="mp4")
+
+
 class FixedClock(Clock):
     def __init__(self, timestamp: datetime) -> None:
         self._timestamp = timestamp
@@ -81,11 +88,13 @@ def validation_policy() -> AvatarValidationPolicy:
 def create_service(validation_policy: AvatarValidationPolicy):
     repository = FakeRepository()
     storage = FakeStorage()
+    provider = FakeAvatarProvider()
     observability = FakeObservability()
     clock = FixedClock(datetime(2026, 4, 16, tzinfo=UTC))
     service = AvatarGenerationService(
         repository=repository,
         asset_storage=storage,
+        provider=provider,
         observability=observability,
         clock=clock,
         validation_policy=validation_policy,
@@ -216,6 +225,45 @@ def test_create_avatar_job_rejects_script_longer_than_max_length(
                     b"\x0d\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
                 ),
                 script="x" * 301,
+            )
+        )
+
+    assert repository.created_jobs == []
+
+
+def test_create_avatar_job_rejects_unsupported_image_content(
+    validation_policy: AvatarValidationPolicy,
+) -> None:
+    service, repository, _, _ = create_service(validation_policy)
+
+    with pytest.raises(ValidationError, match="not a supported image"):
+        service.create_avatar_job(
+            AvatarSubmissionInput(
+                original_filename="portrait.png",
+                declared_content_type="image/png",
+                image_bytes=b"not-a-real-image",
+                script="Hello avatar",
+            )
+        )
+
+    assert repository.created_jobs == []
+
+
+def test_create_avatar_job_rejects_mismatched_declared_image_type(
+    validation_policy: AvatarValidationPolicy,
+) -> None:
+    service, repository, _, _ = create_service(validation_policy)
+
+    with pytest.raises(ValidationError, match="does not match the declared image type"):
+        service.create_avatar_job(
+            AvatarSubmissionInput(
+                original_filename="portrait.png",
+                declared_content_type="image/png",
+                image_bytes=(
+                    b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01"
+                    b"\x00\x01\x00\x00"
+                ),
+                script="Hello avatar",
             )
         )
 

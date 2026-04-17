@@ -1,0 +1,69 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "talking-avatar-generator"
+version = "0.1.0"
+description = "Governed talking avatar generator workshop application."
+readme = "AGENTS.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "jinja2",
+    "pillow",
+    "pydantic",
+    "pydantic-settings",
+    "python-multipart",
+    "sqlalchemy",
+]
+
+[project.optional-dependencies]
+dev = [
+    "httpx",
+    "import-linter",
+    "pytest",
+    "pytest-bdd",
+    "pytest-mock",
+    "ruff",
+]
+
+[tool.setuptools.packages.find]
+include = ["api*", "adapters*", "ports*", "services*", "common*"]
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.importlinter]
+root_packages = ["api", "adapters", "ports", "services", "common"]
+include_external_packages = true
+
+[tool.importlinter.contracts.api_inbound_modules]
+name = "API inbound modules stay port-driven"
+type = "forbidden"
+source_modules = ["api.avatar_jobs", "api.dependencies", "api.models"]
+forbidden_modules = ["adapters", "services", "ports.outbound"]
+
+[tool.importlinter.contracts.services_no_framework_layers]
+name = "Services do not import API or adapters"
+type = "forbidden"
+source_modules = ["services"]
+forbidden_modules = ["api", "adapters"]
+
+[tool.importlinter.contracts.ports_no_framework_layers]
+name = "Ports do not import API or adapters"
+type = "forbidden"
+source_modules = ["ports"]
+forbidden_modules = ["api", "adapters"]
+
+[tool.importlinter.contracts.adapters_no_api]
+name = "Adapters do not import API"
+type = "forbidden"
+source_modules = ["adapters"]
+forbidden_modules = ["api"]
+
+[tool.importlinter.contracts.common_dependency_free]
+name = "Common does not depend on app layers"
+type = "forbidden"
+source_modules = ["common"]
+forbidden_modules = ["api", "adapters", "ports", "services"]

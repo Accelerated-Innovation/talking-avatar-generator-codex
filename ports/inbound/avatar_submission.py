@@ -2,9 +2,21 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Protocol
 
-from services.avatar_generation.models import AvatarJob, AvatarSubmissionInput
+from services.avatar_generation.models import AvatarJob
+
+
+@dataclass(frozen=True)
+class AvatarSubmissionInput:
+    """User-provided data required to create a new avatar job."""
+
+    original_filename: str | None
+    declared_content_type: str | None
+    image_bytes: bytes | None
+    script: str | None
+    selected_voice: str | None = None
 
 
 class AvatarSubmissionPort(Protocol):

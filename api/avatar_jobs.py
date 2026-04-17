@@ -8,8 +8,7 @@ from fastapi.templating import Jinja2Templates
 from api.dependencies import get_avatar_submission_port, get_settings
 from api.models import ApiResponse, AvatarJobResponse, AvatarSubmissionForm
 from common.settings import AppSettings
-from ports.inbound.avatar_submission import AvatarSubmissionPort
-from services.avatar_generation.models import AvatarSubmissionInput
+from ports.inbound.avatar_submission import AvatarSubmissionInput, AvatarSubmissionPort
 
 router = APIRouter(prefix="/v1/avatar-jobs", tags=["avatar-jobs"])
 templates = Jinja2Templates(directory="templates")

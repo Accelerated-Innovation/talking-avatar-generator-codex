@@ -12,13 +12,12 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from api.app import create_app
-from common.settings import AppSettings
-
 
 @pytest.fixture()
-def app_settings(tmp_path: Path) -> AppSettings:
+def app_settings(tmp_path: Path):
     """Create isolated settings for each test."""
+
+    from common.settings import AppSettings
 
     return AppSettings(
         database_url=f"sqlite:///{tmp_path / 'talking-avatar.db'}",
@@ -27,8 +26,10 @@ def app_settings(tmp_path: Path) -> AppSettings:
 
 
 @pytest.fixture()
-def app(app_settings: AppSettings):
+def app(app_settings):
     """Create the FastAPI app for tests."""
+
+    from api.app import create_app
 
     return create_app(settings=app_settings)
 
@@ -38,3 +39,13 @@ def client(app) -> TestClient:
     """Return a synchronous test client."""
 
     return TestClient(app)
+
+
+@pytest.fixture()
+def processing_context():
+    """Share processing state across BDD steps."""
+
+    return {
+        "job_id": None,
+        "job": None,
+    }

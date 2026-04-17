@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-
 from sqlalchemy import Column, DateTime, String, create_engine, select
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import imghdr
 from pathlib import Path
 
 from common.errors import ValidationError
@@ -13,6 +12,8 @@ SUPPORTED_DECLARED_TYPES: dict[str, str] = {
     "image/jpeg": "jpeg",
     "image/png": "png",
 }
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+JPEG_SIGNATURE_PREFIX = b"\xff\xd8\xff"
 
 
 def normalize_extension(filename: str | None) -> str | None:
@@ -27,10 +28,11 @@ def normalize_extension(filename: str | None) -> str | None:
 def normalize_detected_image_type(image_bytes: bytes) -> str | None:
     """Detect the actual image type from file content."""
 
-    detected_type = imghdr.what(None, image_bytes)
-    if detected_type == "jpg":
+    if image_bytes.startswith(PNG_SIGNATURE):
+        return "png"
+    if image_bytes.startswith(JPEG_SIGNATURE_PREFIX):
         return "jpeg"
-    return detected_type
+    return None
 
 
 def validate_submission_inputs(

@@ -17,17 +17,6 @@ class AvatarJobStatus(StrEnum):
 
 
 @dataclass(frozen=True)
-class AvatarSubmissionInput:
-    """User-provided data required to create a new avatar job."""
-
-    original_filename: str | None
-    declared_content_type: str | None
-    image_bytes: bytes | None
-    script: str | None
-    selected_voice: str | None = None
-
-
-@dataclass(frozen=True)
 class AvatarValidationPolicy:
     """Centralized business-rule configuration for submissions."""
 
@@ -35,6 +24,14 @@ class AvatarValidationPolicy:
     max_script_length: int
     max_image_size_bytes: int
     supported_extensions: tuple[str, ...] = ("jpg", "jpeg", "png")
+
+
+@dataclass(frozen=True)
+class AvatarGeneratedVideo:
+    """Provider output returned before persistence."""
+
+    content: bytes
+    file_extension: str
 
 
 @dataclass(frozen=True)
