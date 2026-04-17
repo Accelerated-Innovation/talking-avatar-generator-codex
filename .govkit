@@ -1,0 +1,11 @@
+{
+  "version": "0.4.0",
+  "level": "4",
+  "agent": "codex",
+  "options": {
+    "type": "api",
+    "ui": "none",
+    "ci": "github"
+  },
+  "applied_at": "2026-04-16T19:16:49.816208+00:00"
+}

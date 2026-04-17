@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Talking Avatar Submission</title>
+  </head>
+  <body>
+    <main>
+      <h1>Talking Avatar Submission</h1>
+      <p>Upload a portrait image and enter a short script.</p>
+      <form action="/v1/avatar-jobs" method="post" enctype="multipart/form-data">
+        <label for="image">Portrait image</label>
+        <input id="image" name="image" type="file" accept=".jpg,.jpeg,.png" />
+
+        <label for="script">Script</label>
+        <textarea
+          id="script"
+          name="script"
+          maxlength="{{ max_script_length }}"
+          rows="5"
+        ></textarea>
+
+        <label for="voice">Voice</label>
+        <input id="voice" name="voice" type="text" value="{{ default_voice }}" />
+
+        <button type="submit">Create avatar job</button>
+      </form>
+    </main>
+  </body>
+</html>
